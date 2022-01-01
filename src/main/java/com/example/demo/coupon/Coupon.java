@@ -1,34 +1,42 @@
 package com.example.demo.coupon;
 
+import org.apache.tomcat.jni.Local;
+
+import javax.persistence.*;
 import java.time.LocalDate;
 
+@Entity
+@Table
 public class Coupon {
 
+    @Id
+    @SequenceGenerator(
+            name = "coupon_sequence",
+            sequenceName = "coupon_sequence",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "coupon_sequence"
+    )
     private Long id;
-    private Long ean; //13 stellig beginnt mit 981
     private String name;
-    private LocalDate start;
-    private LocalDate end;
     private double discount;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    @Transient
+    private Long ean;
+    @Transient
     private boolean status;
 
     public Coupon() {
     }
 
-    public Coupon(Long id, String name, double discount) {
-        this.id = id;
+    public Coupon(String name, double discount, LocalDate startDate, LocalDate endDate) {
         this.name = name;
         this.discount = discount;
-    }
-
-    public Coupon(Long id, Long ean, String name, LocalDate start, LocalDate end, double discount, boolean status) {
-        this.id = id;
-        this.ean = ean;
-        this.name = name;
-        this.start = start;
-        this.end = end;
-        this.discount = discount;
-        this.status = status;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     public Long getId() {
@@ -39,14 +47,6 @@ public class Coupon {
         this.id = id;
     }
 
-    public Long getEan() {
-        return ean;
-    }
-
-    public void setEan(Long ean) {
-        this.ean = ean;
-    }
-
     public String getName() {
         return name;
     }
@@ -55,32 +55,40 @@ public class Coupon {
         this.name = name;
     }
 
-    public LocalDate getStart() {
-        return start;
-    }
-
-    public void setStart(LocalDate start) {
-        this.start = start;
-    }
-
-    public LocalDate getEnd() {
-        return end;
-    }
-
-    public void setEnd(LocalDate end) {
-        this.end = end;
-    }
-
     public double getDiscount() {
         return discount;
     }
 
-    public void setDiscount(double discount) {
-        this.discount = discount;
+    public void setDiscount(double discount) { this.discount = discount; }
+
+    public LocalDate getStartDate() {
+        return startDate;
     }
 
-    public boolean isStatus() {
-        return status;
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    //evtl verbessern. https://de.wikipedia.org/wiki/Global_Trade_Item_Number
+    public Long getEan() {
+         return 9810000000000L + this.id;
+    }
+
+    public void setEan(Long ean) {
+        this.ean = ean;
+    }
+
+    public boolean getStatus() {
+        LocalDate today = LocalDate.now();
+        return today.isAfter(this.startDate) && today.isBefore(this.endDate);
     }
 
     public void setStatus(boolean status) {
@@ -91,11 +99,11 @@ public class Coupon {
     public String toString() {
         return "Coupon{" +
                 "id=" + id +
-                ", ean=" + ean +
                 ", name='" + name + '\'' +
-                ", start=" + start +
-                ", end=" + end +
                 ", discount=" + discount +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", ean=" + ean +
                 ", status=" + status +
                 '}';
     }
